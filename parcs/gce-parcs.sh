@@ -52,25 +52,22 @@ tell "PARCS port (4321) is open on leader"
 gcloud compute ssh leader --command "sudo docker network create -d overlay parcs"
 tell "Overlay network created for PARCS"
 
-gcloud compute ssh leader --command "sudo docker run --rm \
-       --name swarmpit-installer \
-       --volume /var/run/docker.sock:/var/run/docker.sock \
-       -e INTERACTIVE=0 \
-       -e ADMIN_USERNAME=admin \
-       -e ADMIN_PASSWORD=password \
-       swarmpit/install:1.9"
-tell "Swarmpit installed"
+tell "Installing Portainer CE..."
+gcloud compute ssh leader --command "sudo mkdir -p /var/lib/portainer/data && \
+    sudo curl -L https://downloads.portainer.io/ce2-19/portainer-agent-stack.yml -o portainer-agent-stack.yml && \
+    sudo docker stack deploy -c portainer-agent-stack.yml portainer"
+tell "Portainer deployed as a stack"
 
-gcloud compute firewall-rules create swarmpit --allow tcp:888
-tell "Firewall rule for Swarmpit created"
+gcloud compute firewall-rules create portainer-rule --allow tcp:9443
+tell "Firewall rule for Portainer (9443) created"
 
-url=$(gcloud compute instances list | grep leader | awk '{print "http://" $5 ":888"}')
+url=$(gcloud compute instances list | grep leader | awk '{print "https://" $5 ":9443"}')
 leader_url=$(gcloud compute instances list | grep leader | awk '{print "tcp://" $4 ":4321"}')
 tell "---------------------------------------"
 tell "LEADER_URL=${leader_url}"
 tell "Dashboard URL: ${url}"
 tell "Login: admin"
-tell "Password: password"
+tell "Password: adminpassword"
 tell "---------------------------------------"
 tell "DON'T FORGET TO DELETE ALL CREATED INSTANCES WHEN YOUR'RE DONE"
 tell "$ gcloud compute instances delete leader ${workers[@]}"
