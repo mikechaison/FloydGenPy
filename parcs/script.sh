@@ -8,4 +8,5 @@ sudo docker service create \
     --env WORKERS=4 \
     --env N=500 \
     --env SERVICE_IMAGE=mikechaison/floyd-gen-py-worker:latest \
+    --env FILE_NAME=matrix.json \
     mikechaison/floyd-gen-py:latest

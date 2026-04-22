@@ -20,16 +20,19 @@ class Leader(Runner):
         n = int(os.environ.get('N', 100))
         w = int(os.getenv('WORKERS', 2))
         service_image = os.getenv('SERVICE_IMAGE')
+        file_name = os.getenv('FILE_NAME', 'matrix.json')
         
         logging.info(f'Starting Leader: N={n}, WORKERS={w}')
 
         try:
-            with open('./matrix.json', 'r') as f:
+            with open(f'./{file_name}', 'r') as f:
                 dist = json.load(f)
-            logging.info('matrix.json loaded successfully')
+            logging.info('Matrix loaded successfully')
         except FileNotFoundError:
-            logging.error('Error: matrix.json not found!')
+            logging.error('Error: matrix not found!')
             return
+        
+        logging.info(f'Given matrix size: {len(dist)}')
 
         workers = [None] * w
         for i in range(w):
@@ -55,15 +58,12 @@ class Leader(Runner):
         
         end_time = time.time()
         logging.info('Task finished!')
+        logging.info(f'Result: {dist[0][n-1]}')
         logging.info(f'Total computation time: {end_time - start_time}')
 
         for worker in workers:
             worker.shutdown()
-
-        with open('output/result.json', 'w') as f:
-            json.dump(dist, f)
         
-        logging.info('File result.json saved successfully!')
         logging.info("Keeping container alive for 5 minutes...")
         time.sleep(300)
 

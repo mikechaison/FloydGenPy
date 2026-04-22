@@ -17,5 +17,4 @@ for k in range(n):
 end = time.time()
 print(f"Execution time: {end - start}")
 
-with open('result.json', 'w') as f:
-    json.dump(dist, f)
+print(dist[0][n-1])
